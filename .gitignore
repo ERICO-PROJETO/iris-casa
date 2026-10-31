@@ -1,0 +1,7 @@
+# O cérebro da Iris vem do suporte a cada conversa e nunca é guardado aqui.
+.nucleo/
+.nucleo.novo/
+.nucleo.erro
+__pycache__/
+*.pyc
+.DS_Store

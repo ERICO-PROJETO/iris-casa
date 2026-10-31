@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instalar a Iris</title>
+<meta name="description" content="Assistente de instalação da Iris no app do Claude.">
+<meta name="theme-color" content="#6c4ab6">
+<style>
+  :root {
+    --fundo: #f7f5fc; --cartao: #ffffff; --texto: #1f1b2e; --suave: #5d5873; --linha: #e4dff2;
+    --cor: #6c4ab6; --cor-forte: #553a93; --cor-clara: #efe9fb; --ok: #1f8a4c; --aviso: #8a5a00; --aviso-claro: #fff4dc;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #14111d; --cartao: #1e1a2b; --texto: #f1eefa; --suave: #b3acc9; --linha: #332c47;
+      --cor: #a88be8; --cor-forte: #c2aef2; --cor-clara: #2a2340; --ok: #5fd08f; --aviso: #f3c46b; --aviso-claro: #3a2e14;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--fundo); color: var(--texto);
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+  .topo { display: flex; align-items: center; gap: 12px; padding: 4px 0 14px; }
+  .logo {
+    flex: none; width: 40px; height: 40px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c9b6ff, var(--cor) 60%, var(--cor-forte));
+    box-shadow: 0 4px 14px rgba(108, 74, 182, .35);
+  }
+  .topo b { font-size: 1.05rem; }
+  .topo small { display: block; color: var(--suave); font-size: .85rem; }
+  .pontos { display: flex; gap: 6px; margin-bottom: 18px; }
+  .pontos i { flex: 1; height: 6px; border-radius: 99px; background: var(--linha); }
+  .pontos i.ja { background: var(--cor); }
+  .tela { flex: 1; background: var(--cartao); border: 1px solid var(--linha); border-radius: 18px; padding: 22px 18px; }
+  .tela h1 { font-size: 1.45rem; line-height: 1.25; margin: 0 0 10px; }
+  .tela p, .tela li { margin: 8px 0; }
+  ol { padding-left: 22px; }
+  .botao {
+    display: block; width: 100%; text-align: center; text-decoration: none; cursor: pointer;
+    background: var(--cor); color: #fff; border: 0; border-radius: 14px; padding: 15px 16px;
+    font: inherit; font-weight: 650; margin: 14px 0 0;
+  }
+  .botao:active { background: var(--cor-forte); }
+  .botao.leve { background: transparent; color: var(--cor-forte); border: 1.5px solid var(--cor); }
+  .botao[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+  .escolha { display: grid; gap: 10px; margin-top: 16px; }
+  .escolha button {
+    text-align: left; border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto);
+    border-radius: 14px; padding: 14px 16px; font: inherit; cursor: pointer;
+  }
+  .escolha button b { display: block; font-size: 1.1rem; }
+  .escolha button span { color: var(--suave); font-size: .92rem; }
+  .escolha button:active { border-color: var(--cor); background: var(--cor-clara); }
+  .selo { display: inline-block; font-size: .78rem; font-weight: 700; color: var(--aviso); background: var(--aviso-claro);
+          border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
+  .dica { font-size: .92rem; color: var(--suave); background: var(--fundo); border-radius: 12px; padding: 10px 12px; margin-top: 14px; }
+  label.campo { display: block; font-weight: 650; margin-top: 14px; }
+  input[type=text] {
+    width: 100%; margin-top: 6px; padding: 13px 14px; font: inherit; border-radius: 12px;
+    border: 1.5px solid var(--linha); background: var(--fundo); color: var(--texto);
+  }
+  input[type=text]:focus { outline: none; border-color: var(--cor); }
+  .linha-copiar {
+    display: block; background: var(--fundo); border: 1px dashed var(--linha); border-radius: 10px;
+    padding: 10px 12px; font: .95rem ui-monospace, Menlo, monospace; overflow-x: auto; white-space: nowrap;
+  }
+  .rodape { display: flex; gap: 10px; padding-top: 14px; }
+  .rodape button {
+    flex: 1; border-radius: 14px; padding: 14px; font: inherit; font-weight: 650; cursor: pointer;
+    border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto);
+  }
+  .rodape .seguir { flex: 2; background: var(--ok); border-color: var(--ok); color: #fff; }
+  .festa { text-align: center; font-size: 3rem; margin: 6px 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="topo">
+    <div class="logo" aria-hidden="true"></div>
+    <div><b>Instalar a Iris</b><small id="onde">Passo 1 de 6</small></div>
+  </div>
+  <div class="pontos" id="pontos" aria-hidden="true"></div>
+
+  <!-- 1. Escolher o app -->
+  <section class="tela" data-tela="app">
+    <h1>Oi! Vamos ligar a Iris no seu celular 💜</h1>
+    <p>Ela vai morar dentro do app de inteligência artificial que você já usa. Qual é o seu?</p>
+    <div class="escolha">
+      <button type="button" data-app="claude"><b>Claude</b><span>Precisa ser a versão paga (Pro ou maior).</span></button>
+      <button type="button" data-app="chatgpt"><b>ChatGPT <span class="selo">em teste</span></b><span>Ainda em teste: prefira o Claude.</span></button>
+    </div>
+    <p class="dica">Leva uns 10 minutos. Se você sair desta página, ela lembra onde parou.</p>
+  </section>
+
+  <!-- 2. GitHub -->
+  <section class="tela" data-tela="github" hidden>
+    <h1>Primeiro, o cofre da Iris</h1>
+    <p>A Iris guarda a memória e os seus arquivos no <b>GitHub</b>, num lugar privado que só você vê.</p>
+    <a class="botao" href="https://github.com/signup" target="_blank" rel="noopener">Criar minha conta no GitHub</a>
+    <a class="botao leve" href="https://github.com/login" target="_blank" rel="noopener">Já tenho conta: entrar</a>
+    <p class="dica">O GitHub manda um código para o seu e-mail para confirmar. Guarde bem a senha: a Iris nunca vai pedir.</p>
+    <p class="dica so-iphone" hidden>No iPhone: quando terminar, volte para esta aba do Safari (ícone de abas, no canto).</p>
+  </section>
+
+  <!-- 3. Criar a casa -->
+  <section class="tela" data-tela="casa" hidden>
+    <h1>Agora, crie a casa da sua Iris</h1>
+    <p>O botão abre a tela do GitHub já preenchida. Lá você só:</p>
+    <ol>
+      <li>Confere se está marcado <b>Private</b>.</li>
+      <li>Toca em <b>Create repository</b>, no fim da tela.</li>
+    </ol>
+    <a class="botao" id="criar" target="_blank" rel="noopener">Criar a casa da minha Iris</a>
+    <p class="dica">Se o GitHub disser que o nome já existe, é porque você já criou antes. Pode seguir.</p>
+    <p class="dica so-iphone" hidden>Se abrir o app do GitHub e não aparecer a tela de criar, toque e segure o botão roxo e escolha <b>Abrir em Nova Aba</b>.</p>
+  </section>
+
+  <!-- 4. Ativar o acesso -->
+  <section class="tela" data-tela="ativar" hidden>
+    <h1>Ative a sua Iris</h1>
+    <p>Mande o seu nome de usuário do GitHub para quem te passou a Iris. É com ele que o seu acesso é liberado.</p>
+    <p class="dica">Onde achar: no GitHub, toque na sua foto (no canto de cima). O nome que aparece embaixo do seu nome é o seu usuário.</p>
+    <label class="campo" for="usuario">Seu usuário do GitHub</label>
+    <input type="text" id="usuario" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ex.: maria-silva">
+    <a class="botao" id="mandar" target="_blank" rel="noopener" aria-disabled="true">Mandar pelo WhatsApp</a>
+    <p>Em seguida chega um <b>convite por e-mail</b>. Abra e toque em <b>Accept invitation</b> (aceitar), ou use o botão abaixo.</p>
+    <a class="botao leve" id="aceitar" target="_blank" rel="noopener">Aceitar o convite</a>
+    <p class="dica">Se o botão disser que não há convite, ele ainda não foi liberado. Espere um pouquinho e tente de novo.</p>
+  </section>
+
+  <!-- 5a. Conectar o Claude -->
+  <section class="tela" data-tela="ligar" data-so="claude" hidden>
+    <h1>Ligue o Claude no cofre</h1>
+    <p><b>Só desta vez</b>, pelo navegador:</p>
+    <ol>
+      <li>Toque no botão e entre com a sua conta do Claude.</li>
+      <li>Toque em <b>Conectar ao GitHub</b> (Connect GitHub) e autorize.</li>
+      <li>No GitHub, escolha <b>Only select repositories</b>, marque <b>minha-iris</b> e confirme.</li>
+    </ol>
+    <a class="botao" href="https://claude.ai/code" target="_blank" rel="noopener">Abrir o Claude Code</a>
+  </section>
+
+  <!-- 5b. Conectar o ChatGPT -->
+  <section class="tela" data-tela="ligar" data-so="chatgpt" hidden>
+    <h1>Ligue o ChatGPT no cofre <span class="selo">em teste</span></h1>
+    <p><b>Só desta vez</b>, pelo navegador:</p>
+    <ol>
+      <li>Toque no botão e entre com a sua conta do ChatGPT.</li>
+      <li>Toque em <b>Conectar ao GitHub</b> e autorize, escolhendo <b>minha-iris</b>.</li>
+      <li>Crie um <b>ambiente</b> (environment) para <b>minha-iris</b>. Em <b>Script de configuração</b> (Setup script), cole a linha abaixo e salve.</li>
+    </ol>
+    <code class="linha-copiar" id="script">bash iniciar.sh</code>
+    <button class="botao leve" id="copiar" type="button">Copiar a linha</button>
+    <a class="botao" href="https://chatgpt.com/codex" target="_blank" rel="noopener">Abrir o Codex</a>
+  </section>
+
+  <!-- 6a. Primeira conversa no Claude -->
+  <section class="tela" data-tela="conversar" data-so="claude" hidden>
+    <h1>Diga oi para a Iris</h1>
+    <ol>
+      <li>Abra o <b>app do Claude</b>.</li>
+      <li>Toque na aba <b>Code</b>.</li>
+      <li>Escolha <b>minha-iris</b> e escreva <b>"Oi, Iris"</b>.</li>
+    </ol>
+    <a class="botao" href="https://claude.ai/code" target="_blank" rel="noopener">Abrir o Claude</a>
+    <p class="dica">É sempre por ali: aba Code, minha-iris. A Iris lembra de tudo de uma conversa para a outra.</p>
+  </section>
+
+  <!-- 6b. Primeira conversa no ChatGPT -->
+  <section class="tela" data-tela="conversar" data-so="chatgpt" hidden>
+    <h1>Diga oi para a Iris</h1>
+    <ol>
+      <li>Abra o <b>app do ChatGPT</b> e entre no <b>Codex</b>.</li>
+      <li>Escolha <b>minha-iris</b> e escreva <b>"Oi, Iris"</b>.</li>
+      <li>No fim de cada conversa, toque em <b>Criar PR</b> (Create PR). É assim que a Iris guarda o que aprendeu.</li>
+    </ol>
+    <a class="botao" href="https://chatgpt.com/codex" target="_blank" rel="noopener">Abrir o ChatGPT</a>
+  </section>
+
+  <!-- Fim -->
+  <section class="tela" data-tela="pronto" hidden>
+    <div class="festa">🎉</div>
+    <h1 style="text-align:center">A Iris é sua!</h1>
+    <p>Peça do jeito que você fala: "monta uma planilha dos meus gastos", "me lembra de pagar a luz dia 5", "prepara minha consulta de quinta".</p>
+    <p class="dica">Os arquivos que ela criar chegam com um link para baixar. Os lembretes vão direto para a agenda do celular.</p>
+    <button class="botao leve" type="button" id="recomecar">Ver os passos de novo</button>
+  </section>
+
+  <div class="rodape" id="rodape">
+    <button type="button" id="voltar">Voltar</button>
+    <button type="button" class="seguir" id="seguir">Já fiz, próximo</button>
+  </div>
+</main>
+
+<script>
+  // Ajuste aqui: o modelo da casa, o cérebro (onde fica o convite) e o WhatsApp do suporte
+  // (só números, com DDI; vazio = a pessoa escolhe o contato no WhatsApp).
+  const DONO = "ERICO-PROJETO";
+  const MODELO_CASA = "iris-casa";
+  const NUCLEO = "iris-nucleo";
+  const SUPORTE_WHATSAPP = "";
+
+  const ORDEM = ["app", "github", "casa", "ativar", "ligar", "conversar", "pronto"];
+  const CHAVE = "iris-assistente";
+  const ler = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; } };
+  const gravar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} };
+  const estado = Object.assign({ tela: "app", app: null, usuario: "" }, ler());
+  const daUrl = new URLSearchParams(location.search).get("app");
+  if (daUrl === "claude" || daUrl === "chatgpt") estado.app = daUrl;
+  if (!estado.app) estado.tela = "app";
+
+  document.getElementById("criar").href = "https://github.com/new?" + new URLSearchParams({
+    template_owner: DONO, template_name: MODELO_CASA, name: "minha-iris",
+    description: "Minha Iris", visibility: "private"
+  });
+  document.getElementById("aceitar").href = `https://github.com/${DONO}/${NUCLEO}/invitations`;
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.querySelectorAll(".so-iphone").forEach(e => e.hidden = false);
+
+  const campo = document.getElementById("usuario");
+  const mandar = document.getElementById("mandar");
+  function prepararMensagem() {
+    const u = campo.value.trim().replace(/^@/, "").replace(/\s+/g, "");
+    estado.usuario = u; gravar();
+    const ok = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(u);
+    mandar.setAttribute("aria-disabled", ok ? "false" : "true");
+    const texto = `Oi! Quero ativar a minha Iris. Meu usuário do GitHub é: ${u}`;
+    mandar.href = (SUPORTE_WHATSAPP ? `https://wa.me/${SUPORTE_WHATSAPP}` : "https://wa.me/") + "?text=" + encodeURIComponent(texto);
+  }
+  campo.value = estado.usuario || "";
+  campo.addEventListener("input", prepararMensagem);
+  prepararMensagem();
+
+  const pontos = document.getElementById("pontos");
+  ORDEM.slice(0, -1).forEach(() => pontos.appendChild(document.createElement("i")));
+
+  function mostrar(tela) {
+    estado.tela = tela; gravar();
+    document.querySelectorAll("[data-tela]").forEach(s => {
+      s.hidden = s.dataset.tela !== tela || (s.dataset.so && s.dataset.so !== estado.app);
+    });
+    const i = ORDEM.indexOf(tela);
+    [...pontos.children].forEach((p, n) => p.classList.toggle("ja", n <= i - 1 || tela === "pronto"));
+    document.getElementById("onde").textContent = tela === "pronto" ? "Tudo pronto" : `Passo ${i + 1} de ${ORDEM.length - 1}`;
+    document.getElementById("rodape").hidden = tela === "app" || tela === "pronto";
+    document.getElementById("seguir").textContent = tela === "conversar" ? "Funcionou!" : "Já fiz, próximo";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.querySelectorAll("[data-app]").forEach(b => b.addEventListener("click", () => {
+    estado.app = b.dataset.app; mostrar("github");
+  }));
+  document.getElementById("seguir").addEventListener("click", () => mostrar(ORDEM[ORDEM.indexOf(estado.tela) + 1]));
+  document.getElementById("voltar").addEventListener("click", () => mostrar(ORDEM[Math.max(0, ORDEM.indexOf(estado.tela) - 1)]));
+  document.getElementById("recomecar").addEventListener("click", () => mostrar("app"));
+  document.getElementById("copiar").addEventListener("click", async (ev) => {
+    try { await navigator.clipboard.writeText(document.getElementById("script").textContent); ev.target.textContent = "Copiado ✓"; }
+    catch (e) { ev.target.textContent = "Toque e segure a linha acima para copiar"; }
+  });
+
+  mostrar(ORDEM.includes(estado.tela) ? estado.tela : "app");
+</script>
+</body>
+</html>

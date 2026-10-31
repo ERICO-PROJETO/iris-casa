@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.xlsx binary
+*.docx binary
+*.pdf binary
+*.png binary
+# Arquivos em que a Iris só acrescenta: na junção, mantém as linhas das duas conversas.
+memoria/diario/*.md merge=union
+memoria/licoes.md merge=union
+memoria/preferencias.md merge=union
+dados/lembretes.md merge=union
+dados/listas/*.md merge=union

@@ -1,0 +1,45 @@
+# A Iris trabalha num ramo novo a cada conversa (claude/..., codex/..., iris/...).
+# Esta regra junta o que ela guardou no ramo principal em menos de um minuto, para a próxima conversa já lembrar.
+name: Iris guarda a memória
+
+on:
+  push:
+    branches: ["claude/**", "codex/**", "iris/**"]
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: iris-juntar
+  cancel-in-progress: false
+
+jobs:
+  juntar:
+    # Nunca roda no próprio modelo (para não guardar memória de ninguém nele); só nas cópias de cada pessoa.
+    if: >-
+      !github.event.repository.is_template &&
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Juntar no ramo principal
+        env:
+          RAMO: ${{ github.event_name == 'push' && github.ref_name || github.head_ref }}
+        run: |
+          git config user.name "Iris"
+          git config user.email "iris@users.noreply.github.com"
+          git fetch origin "$RAMO"
+          if git merge --no-edit -X theirs "origin/$RAMO" -m "Iris: junta $RAMO"; then
+            git push origin main
+          else
+            git merge --abort || true
+            echo "::error::Não deu para juntar $RAMO sozinho. Abra o pedido de junção (PR) e toque em Merge."
+            exit 1
+          fi
